@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CLAWS Booking</title>
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial,sans-serif;
+  background:#0b0b0f;
+  color:white;
+  display:grid;
+  place-items:center;
+  min-height:100vh;
+}
+.card{
+  width:95%;
+  max-width:900px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:20px;
+}
+h1{color:#d8b24c;text-align:center;margin:0 0 10px}
+p{text-align:center;color:#ccc;font-size:14px;margin:0 0 15px}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  text-align:center;
+}
+th,td{
+  border:1px solid rgba(255,255,255,.15);
+  padding:10px;
+  cursor:pointer;
+}
+th{background:rgba(216,178,76,.15)}
+td.booked{background:rgba(216,178,76,.35);color:black}
+td:hover{background:rgba(216,178,76,.25)}
+
+input{
+  width:100%;
+  padding:8px;
+  border-radius:8px;
+  border:none;
+  margin-top:6px;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h1>CLAWS Sports Media Booking</h1>
+<p>Click a day → type your name → it saves.</p>
+
+<table id="calendar"></table>
+</div>
+
+<script>
+const calendar = document.getElementById("calendar");
+const date = new Date();
+const year = date.getFullYear();
+const month = date.getMonth();
+
+const bookings = JSON.parse(localStorage.getItem("clawsBookings") || "{}");
+
+function render(){
+  calendar.innerHTML = "";
+  const firstDay = new Date(year, month, 1).getDay();
+  const days = new Date(year, month+1, 0).getDate();
+
+  let html = "<tr>";
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d=>{
+    html += "<th>"+d+"</th>";
+  });
+  html += "</tr><tr>";
+
+  for(let i=0;i<firstDay;i++) html += "<td></td>";
+
+  for(let d=1; d<=days; d++){
+    const key = `${year}-${month}-${d}`;
+    const name = bookings[key] || "";
+    html += `<td class="${name?"booked":""}" onclick="book('${key}')">
+      ${d}<br><small>${name}</small>
+    </td>`;
+    if((d+firstDay)%7===0) html+="</tr><tr>";
+  }
+  html += "</tr>";
+  calendar.innerHTML = html;
+}
+
+function book(key){
+  const name = prompt("Enter your name for this day:");
+  if(name){
+    bookings[key] = name;
+    localStorage.setItem("clawsBookings", JSON.stringify(bookings));
+    render();
+  }
+}
+
+render();
+</script>
+
+</body>
+</html>
